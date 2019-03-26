@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ContactLetterDao">
+    <sql id="cols">
+      receiptnum,receiptheme,receiptdate,ifoutproject,project,pattern,mattercaption,receiptstatus,remarks
+    </sql>
+
+    <sql id="base_where">
+        <where>
+            <if test="contactLetter != null">
+                <if test="contactLetter.receiptNum != null and contactLetter.receiptNum != ''">
+                    receiptnum like concat('%',#{contactLetter.receiptNum},'%')
+                </if>
+                <if test="contactLetter.receipTheme != null and contactLetter.receipTheme != ''">
+                    and receiptheme = #{contactLetter.receipTheme}
+                </if>
+                <if test="contactLetter.receiptdate != null and contactLetter.receiptdate != ''">
+                    and date_format(receiptdate,'%Y-%m-%d') = #{contactLetter.receiptdate}
+                </if>
+                <if test="contactLetter.ifoutproject != null and contactLetter.ifoutproject != ''">
+                    and ifoutproject = #{contactLetter.ifoutproject}
+                </if>
+                <if test="contactLetter.project != null and contactLetter.project != ''">
+                    and project = #{contactLetter.project}
+                </if>
+                <if test="contactLetter.pattern != null and contactLetter.pattern != ''">
+                    and type = #{contactLetter.pattern}
+                </if>
+                <if test="contactLetter.mattercaption != null and contactLetter.mattercaption != ''">
+                    and mattercaption = #{contactLetter.mattercaption}
+                </if>
+                <if test="contactLetter.receiptstatus != null and contactLetter.receiptstatus != ''">
+                    and receiptstatus = #{contactLetter.receiptstatus}
+                </if>
+                <if test="contactLetter.remarks != null and contactLetter.remarks != ''">
+                    and remarks = #{contactLetter.remarks}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="findById" resultType="contactLetter" parameterType="String">
+        select <include refid="cols"></include> from worklink where receiptnum = #{receiptnum}
+    </select>
+
+    <delete id="delete" parameterType="java.util.List">
+      delete from worklink where receiptnum in
+        <foreach index="index" collection="list" item="receiptNum" open="(" separator="," close=")" >
+            #{receiptNum}
+        </foreach>
+    </delete>
+
+    <update id="update" parameterType="contactLetter">
+        update worklink set receiptdate=#{receiptDate},receiptheme=#{receipTheme},ifoutproject=#{ifOutProject},project=#{project},pattern=#{pattern},mattercaption=#{matterCaption},receiptstatus=#{receiptStatus},remarks=#{remarks} where receiptnum = #{receiptNum}
+    </update>
+
+    <insert id="save" parameterType="contactLetter">
+        insert into worklink(receiptnum,receiptheme,receiptdate,ifoutproject,project,pattern,mattercaption,receiptstatus,remarks) values(#{receiptNum},#{receipTheme},#{receiptDate},#{ifOutProject},#{project},#{pattern},#{matterCaption},#{receiptStatus},#{remarks}) on duplicate key update receiptnum=receiptnum+1
+    </insert>
+
+    <select id="findAll" parameterType="map" resultType="contactLetter">
+        select <include refid="cols"/> from worklink
+        <include refid="base_where"/>
+        <if test="sortOrder != null and orderBy != null">
+            order by #{sortOrder} #{orderBy}
+        </if>
+        <if test="start != null and limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getTotal" resultType="int" parameterType="contactLetter">
+        select count(*) from worklink
+        <include refid="base_where"/>
+    </select>
+</mapper>
